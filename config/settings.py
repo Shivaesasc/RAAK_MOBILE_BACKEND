@@ -1,4 +1,4 @@
-
+﻿
 
 from pathlib import Path
 import os
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
 
     'accounts',
     'user_profiles',
+    'organization',
     'rest_framework_simplejwt.token_blacklist',
 ]
 
