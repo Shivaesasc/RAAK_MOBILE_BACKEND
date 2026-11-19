@@ -1,4 +1,4 @@
-﻿from django.contrib import admin
+from django.contrib import admin
 
 from .models import (
     AcademicBatch,
@@ -35,9 +35,9 @@ class DepartmentAdmin(admin.ModelAdmin):
 
 @admin.register(Degree)
 class DegreeAdmin(admin.ModelAdmin):
-    list_display = ("name", "code", "institution", "department", "duration_years", "is_active")
-    list_filter = ("institution", "department", "is_active")
-    search_fields = ("name", "code", "department__name")
+    list_display = ("name", "code", "institution", "duration_years", "is_active")
+    list_filter = ("institution", "is_active")
+    search_fields = ("name", "code", "institution__name")
 
 
 @admin.register(Programme)

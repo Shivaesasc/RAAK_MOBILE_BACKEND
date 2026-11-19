@@ -57,13 +57,14 @@ class Department(TimeStampedModel):
         return f"{self.name} ({self.code})"
 
 
+
 class Degree(TimeStampedModel):
     institution = models.ForeignKey(
-        Institution, on_delete=models.PROTECT, related_name="degrees"
+        Institution,
+        on_delete=models.PROTECT,
+        related_name="degrees",
     )
-    department = models.ForeignKey(
-        Department, on_delete=models.PROTECT, related_name="degrees"
-    )
+
     name = models.CharField(max_length=150)
     code = models.CharField(max_length=30)
     level = models.CharField(max_length=50, blank=True)
@@ -74,13 +75,14 @@ class Degree(TimeStampedModel):
         ordering = ["name"]
         constraints = [
             models.UniqueConstraint(
-                fields=["department", "code"],
-                name="unique_degree_code_per_department",
+                fields=["institution", "code"],
+                name="unique_degree_code_per_institution",
             )
         ]
 
     def __str__(self):
         return f"{self.name} ({self.code})"
+
 
 
 class Programme(TimeStampedModel):

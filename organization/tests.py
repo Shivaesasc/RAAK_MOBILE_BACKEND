@@ -1,4 +1,4 @@
-﻿from datetime import date
+from datetime import date
 
 from django.urls import reverse
 from rest_framework import status
@@ -56,7 +56,6 @@ class OrganizationAPITests(APITestCase):
 
         self.degree = Degree.objects.create(
             institution=self.institution,
-            department=self.department,
             name="Bachelor of Science",
             code="TEST-BSC",
             level="UG",
@@ -318,7 +317,7 @@ class OrganizationAPITests(APITestCase):
             status.HTTP_400_BAD_REQUEST,
         )
 
-    def test_degree_rejects_department_from_another_institution(self):
+    def test_programme_rejects_degree_and_department_from_different_institutions(self):
         another_institution = Institution.objects.create(
             name="Another Test Institution",
             code="TEST-INST-2",
@@ -330,14 +329,14 @@ class OrganizationAPITests(APITestCase):
         )
 
         response = self.client.post(
-            self.endpoint("degrees"),
+            self.endpoint("programmes"),
             {
-                "institution": self.institution.pk,
+                "degree": self.degree.pk,
                 "department": another_department.pk,
-                "name": "Invalid Degree",
-                "code": "TEST-INVALID-DEG",
-                "level": "UG",
+                "name": "Invalid Programme",
+                "code": "TEST-INVALID-PROG",
                 "duration_years": 3,
+                "total_semesters": 6,
             },
             format="json",
         )
@@ -385,6 +384,13 @@ class OrganizationAPITests(APITestCase):
 
         response = self.client.post(
             self.endpoint("departments", self.department.pk)
+            + "deactivate/"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Degree is also a direct child of Institution.
+        response = self.client.post(
+            self.endpoint("degrees", self.degree.pk)
             + "deactivate/"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)

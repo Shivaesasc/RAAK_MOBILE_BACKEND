@@ -149,6 +149,17 @@ class InstitutionViewSet(OrganizationBaseViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        if institution.degrees.filter(is_active=True).exists():
+            return Response(
+                {
+                    "detail": (
+                        "Deactivate the institution's active degrees "
+                        "before deactivating this institution."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         institution.is_active = False
         institution.save(update_fields=["is_active", "updated_at"])
 
@@ -173,11 +184,9 @@ class DepartmentViewSet(OrganizationBaseViewSet):
 
 class DegreeViewSet(OrganizationBaseViewSet):
     serializer_class = DegreeSerializer
-    queryset = Degree.objects.select_related(
-        "institution", "department"
-    ).all()
-    search_fields = ("name", "code", "level", "department__name")
-    filter_fields = ("institution", "department")
+    queryset = Degree.objects.select_related("institution").all()
+    search_fields = ("name", "code", "level", "institution__name")
+    filter_fields = ("institution",)
 
 
 class ProgrammeViewSet(OrganizationBaseViewSet):

@@ -1,4 +1,4 @@
-﻿from rest_framework import serializers
+from rest_framework import serializers
 
 from .models import (
     AcademicBatch,
@@ -66,34 +66,21 @@ class DegreeSerializer(serializers.ModelSerializer):
     institution_name = serializers.CharField(
         source="institution.name", read_only=True
     )
-    department_name = serializers.CharField(
-        source="department.name", read_only=True
-    )
 
     class Meta:
         model = Degree
         fields = [
-            "id", "institution", "institution_name",
-            "department", "department_name", "name", "code",
+            "id", "institution", "institution_name", "name", "code",
             "level", "duration_years", "is_active",
             "created_at", "updated_at",
         ]
         read_only_fields = [
-            "id", "institution_name", "department_name",
-            "created_at", "updated_at",
+            "id", "institution_name", "created_at", "updated_at",
         ]
 
-    def validate(self, attrs):
-        institution = get_value(attrs, self.instance, "institution")
-        department = get_value(attrs, self.instance, "department")
+    def validate_institution(self, institution):
         require_active(institution, "institution")
-        require_active(department, "department")
-
-        if institution and department and department.institution_id != institution.id:
-            raise serializers.ValidationError({
-                "department": "Department must belong to the selected institution."
-            })
-        return attrs
+        return institution
 
 
 class ProgrammeSerializer(serializers.ModelSerializer):
@@ -120,9 +107,13 @@ class ProgrammeSerializer(serializers.ModelSerializer):
         require_active(degree, "degree")
         require_active(department, "department")
 
-        if degree and department and degree.department_id != department.id:
+        # Degree and Department are independent children of Institution.
+        # A Programme may link them only when they belong to the same Institution.
+        if degree and department and degree.institution_id != department.institution_id:
             raise serializers.ValidationError({
-                "degree": "The selected Degree must belong to the selected Department."
+                "department": (
+                    "The selected Department and Degree must belong to the same Institution."
+                )
             })
         return attrs
 
